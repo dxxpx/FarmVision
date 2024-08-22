@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "714769860123",
+    "project_id": "farmvision-86826",
+    "storage_bucket": "farmvision-86826.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:714769860123:android:8408dcc89f64bfc69f1abe",
+        "android_client_info": {
+          "package_name": "com.sih.farmvision"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKzrYcx1M85pejshl1OVqeC0MXKzZ8ykU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
