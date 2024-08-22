@@ -1,44 +1,119 @@
 import 'dart:convert';
+import 'package:farmvision/Services/uploadPhotoPage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  final String recommendation = "";
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'AI Assistant',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const ChatPage(),
-    );
-  }
-}
-
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
-
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
   late ChatUser _currentUser;
+  final ScrollController _scrollController = ScrollController();
+  String userState = "Maharashtra";
   final ChatUser _gptChatUser = ChatUser(
     id: '2',
     firstName: 'Gemini',
     lastName: 'AI',
   );
+
+  List<QuickReply> _getQuickReplies(String state) {
+    return [
+      QuickReply(
+        title: "Best crops in $state?",
+        value: "What are the best crops to grow in $state?",
+      ),
+      QuickReply(
+        title: "Soil care in $state",
+        value: "How to take care of soil in $state?",
+      ),
+      QuickReply(
+        title: "Water needs in $state",
+        value: "What are the water needs for crops in $state?",
+      ),
+      QuickReply(
+        title: "Cattle diseases in $state",
+        value: "What are the common cattle diseases in $state?",
+      ),
+      QuickReply(
+        title: "Dairy farming in $state",
+        value: "How is dairy farming in $state?",
+      ),
+    ];
+  }
+
+  List<QuickReply> _getInitialQuickReplies(String state) {
+    return [
+      QuickReply(
+        title: "Best crops in $state?",
+        value: "What are the best crops to grow in $state?",
+      ),
+      QuickReply(
+        title: "Soil care in $state",
+        value: "How to take care of soil in $state?",
+      ),
+      QuickReply(
+        title: "Water needs in $state",
+        value: "What are the water needs for crops in $state?",
+      ),
+      QuickReply(
+        title: "Cattle diseases in $state",
+        value: "What are the common cattle diseases in $state?",
+      ),
+      QuickReply(
+        title: "Dairy farming in $state",
+        value: "How is dairy farming in $state?",
+      ),
+    ];
+  }
+
+  List<QuickReply> _getDairyFarmingQuickReplies(String state) {
+    return [
+      QuickReply(
+        title: "Best breeds in $state",
+        value: "What are the best dairy breeds in $state?",
+      ),
+      QuickReply(
+        title: "Feeding tips in $state",
+        value: "What are the best feeding tips for dairy farming in $state?",
+      ),
+      QuickReply(
+        title: "Common issues in $state",
+        value: "What are common issues in dairy farming in $state?",
+      ),
+      QuickReply(
+        title: "Milk production in $state",
+        value: "How to improve milk production in $state?",
+      ),
+      QuickReply(
+        title: "Marketing in $state",
+        value:
+            "What are the best practices for marketing dairy products in $state?",
+      ),
+    ];
+  }
+
+  QuickReplyOptions _quickReplyOptions(String state) {
+    return QuickReplyOptions(
+      onTapQuickReply: (QuickReply reply) {
+        _sendQuickReplyMessage(reply);
+      },
+      quickReplyStyle: BoxDecoration(
+        color: Colors.blueAccent,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      quickReplyTextStyle: TextStyle(color: Colors.white),
+      quickReplyMargin: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+      quickReplyPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+    );
+  }
+
+  List<QuickReply> _quickReplies = [];
 
   List<ChatMessage> _messages = <ChatMessage>[];
   List<ChatUser> _typingUsers = <ChatUser>[];
@@ -47,6 +122,20 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
     _initializeCurrentUser();
+    _sendInitialMessage();
+    _quickReplies = _getInitialQuickReplies("Maharashtra");
+  }
+
+  void _sendInitialMessage() {
+    ChatMessage initialMessage = ChatMessage(
+      user: _gptChatUser,
+      createdAt: DateTime.now(),
+      text: "Hello! How can I help you?",
+    );
+
+    setState(() {
+      _messages.insert(0, initialMessage);
+    });
   }
 
   void _initializeCurrentUser() {
@@ -132,7 +221,7 @@ Give them as short direct bulletin points on immediate concerns what the user sh
   }
 
   void sendPromptToNode(String Prompt) async {
-    const baseurl = "http://192.168.238.89:3000/api/data";
+    const baseurl = "http://192.168.177.89:3000/api/data";
     try {
       final url = Uri.parse(baseurl);
       final response = await http.post(url,
@@ -150,6 +239,71 @@ Give them as short direct bulletin points on immediate concerns what the user sh
 
   void _onSelected(BuildContext context, int item) {
     _sendRecommendationRequest(value: item);
+  }
+
+  void _sendQuickReplyMessage(QuickReply reply) {
+    ChatMessage message = ChatMessage(
+      user: _currentUser,
+      createdAt: DateTime.now(),
+      text: reply.value.toString(),
+    );
+
+    setState(() {
+      _messages.insert(0, message);
+      _typingUsers.add(_gptChatUser);
+      if (reply.value!.contains("How is dairy farming")) {
+        _quickReplies = _getDairyFarmingQuickReplies(userState);
+      } else {
+        // Revert to initial quick replies or handle other cases if needed
+        _quickReplies = _getInitialQuickReplies(userState);
+      }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        0,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    });
+
+    getAIResponse(message);
+  }
+
+  Widget _buildQuickReplies(String state) {
+    // List<QuickReply> quickReplies = _getQuickReplies(state);
+    List<QuickReply> quickReplies = _quickReplies.isNotEmpty
+        ? _quickReplies
+        : _getInitialQuickReplies(state);
+
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      height: 50,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: quickReplies.length,
+        controller: _scrollController,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () => _sendQuickReplyMessage(quickReplies[index]),
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 5),
+              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.blueAccent,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: Text(
+                  quickReplies[index].title,
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -173,32 +327,57 @@ Give them as short direct bulletin points on immediate concerns what the user sh
           ),
         ],
       ),
-      body: DashChat(
-        currentUser: _currentUser,
-        onSend: (ChatMessage message) {
-          setState(() {
-            _messages.insert(0, message);
-            _typingUsers.add(_gptChatUser);
-          });
-          getAIResponse(message);
-        },
-        messages: _messages,
-        typingUsers: _typingUsers,
-        messageOptions: const MessageOptions(
-          currentUserContainerColor: Colors.blue,
-          containerColor: Colors.green,
-          textColor: Colors.white,
-        ),
+      body: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                  child: SizedBox(
+                      height: 60, child: _buildQuickReplies(userState))),
+              IconButton(
+                icon: Icon(Icons.camera_alt, color: Colors.blueAccent),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CameraPage()),
+                  );
+                },
+              ),
+            ],
+          ),
+          Expanded(
+            child: DashChat(
+              currentUser: _currentUser,
+              onSend: (ChatMessage message) {
+                setState(() {
+                  _messages.insert(0, message);
+                  _typingUsers.add(_gptChatUser);
+                });
+                getAIResponse(message);
+              },
+              messages: _messages,
+              typingUsers: _typingUsers,
+              quickReplyOptions: _quickReplyOptions(userState),
+              messageOptions: MessageOptions(
+                currentUserContainerColor: Colors.blue,
+                containerColor: Colors.green,
+                textColor: Colors.white,
+              ),
+            ),
+          ),
+        ],
       ),
       backgroundColor: Colors.black,
     );
   }
 
   Future<void> getAIResponse(ChatMessage Prompt) async {
-    const baseurl = "http://192.168.238.89:3000/api/data";
+    String question = Prompt.text +
+        '\nGive exact answer in bulletin points, No extra descriptions';
+    const baseurl = "http://192.168.177.89:3000/api/data";
     try {
       final url = Uri.parse(baseurl);
-      final prompt = Prompt.text;
+      final prompt = question;
       final content = [Content.text(prompt)];
       final String generatedText = 'No Response Generated';
       final response = await http.post(url,
