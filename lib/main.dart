@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'Screens/HomePage.dart';
 import 'Services/LLM.dart';
 
 void main() async {
@@ -12,12 +13,14 @@ void main() async {
         projectId: "farmvision-86826",
         storageBucket: "farmvision-86826.appspot.com"),
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'Material App', home: ChatPage());
+    return const MaterialApp(title: 'Material App', home: homePage());
   }
 }

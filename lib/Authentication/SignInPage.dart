@@ -27,7 +27,7 @@ class _SignInPageState extends State<SignInPage> {
       // Navigate to the category screen after successful login
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => homePage()),
+        MaterialPageRoute(builder: (context) => const homePage()),
       );
     } on FirebaseAuthException catch (e) {
       print('Failed to sign in: $e');
@@ -38,12 +38,12 @@ class _SignInPageState extends State<SignInPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sign in'),
+        title: const Text('Sign in'),
       ),
       body: SingleChildScrollView(
         child: Center(
           child: Card(
-            margin: EdgeInsets.all(10),
+            margin: const EdgeInsets.all(10),
             color: Colors.purple.shade100,
             child: Padding(
               padding: const EdgeInsets.all(13.0),
@@ -51,39 +51,39 @@ class _SignInPageState extends State<SignInPage> {
                 children: [
                   TextFormField(
                     controller: usernameController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                         labelText: "Enter UserName: ",
                         labelStyle: TextStyle(color: Colors.grey, fontSize: 20),
                         filled: true,
                         fillColor: Colors.white),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: emailController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                         labelText: "Enter your Email : ",
                         labelStyle: TextStyle(color: Colors.grey, fontSize: 20),
                         filled: true,
                         fillColor: Colors.white),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: passwordController,
                     obscureText: true,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                         labelText: "Enter your Password : ",
                         labelStyle: TextStyle(color: Colors.grey, fontSize: 20),
                         filled: true,
                         fillColor: Colors.white),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       ElevatedButton(
                           onPressed: _signIn,
-                          child: Text('Login',
+                          child: const Text('Login',
                               style: TextStyle(fontWeight: FontWeight.bold))),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       ElevatedButton(
                           onPressed: () {
                             // Navigator.push(
@@ -91,9 +91,9 @@ class _SignInPageState extends State<SignInPage> {
                             //     MaterialPageRoute(
                             //         builder: (context) => adminHomePage()));
                           },
-                          child: Text('Admin Login',
+                          child: const Text('Admin Login',
                               style: TextStyle(fontWeight: FontWeight.bold))),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       ElevatedButton(
                           onPressed: () {
                             // Navigator.push(
@@ -101,7 +101,7 @@ class _SignInPageState extends State<SignInPage> {
                             //     MaterialPageRoute(
                             //         builder: (context) => registerScreen()));
                           },
-                          child: Text('Register')),
+                          child: const Text('Register')),
                     ],
                   )
                 ],

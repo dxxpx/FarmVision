@@ -6,9 +6,13 @@ const require = createRequire(import.meta.url);
 const http = require("node:http");
 const express = require("express");
 const app = express();
+import multer from "multer";
 const port = 3000;
 const { Server } = require("ws");
 app.use(express.json());
+
+// Set up multer for handling multipart form data (images)
+const upload = multer({ dest: "uploads/" });
 
 var gemini_reply = "Loading";
 async function GeminiAi(params) {
@@ -27,10 +31,9 @@ async function GeminiAi(params) {
     });
 
     const prompt = params;
-
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    gemini_reply = response.text();
+    gemini_reply = await response.text();
     console.log(response.text());
   } catch (error) {
     console.log("Error inside GeminiAI function : ", error);
@@ -48,8 +51,18 @@ app.get("/api/data", (req, res) => {
 app.post("/api/data", async (req, res) => {
   try {
     console.log("Request from app : ", req.body);
-
     const user_prompt = req.body.prompt;
+    if (!user_prompt) {
+      throw new Error("No prompt provided");
+    }
+    const image = req.file;
+    if (image) {
+      console.log("Image uploaded: ", image.path);
+      // You can process the image if necessary
+    } else {
+      console.log("No image uploaded");
+    }
+
     await GeminiAi(user_prompt);
 
     res.status(200).json({
@@ -57,8 +70,8 @@ app.post("/api/data", async (req, res) => {
       status_code: 200,
       message: gemini_reply,
       // message: "hello , Replied",
-      //   user_prompt: req.body,
-      user_prompt: "User prompt",
+      user_prompt: req.body,
+      // user_prompt: "User prompt",
     });
   } catch (error) {
     console.log("Error in Post : ", error);

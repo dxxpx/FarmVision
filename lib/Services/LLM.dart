@@ -107,16 +107,17 @@ class _ChatPageState extends State<ChatPage> {
         color: Colors.blueAccent,
         borderRadius: BorderRadius.circular(20),
       ),
-      quickReplyTextStyle: TextStyle(color: Colors.white),
-      quickReplyMargin: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-      quickReplyPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      quickReplyTextStyle: const TextStyle(color: Colors.white),
+      quickReplyMargin: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+      quickReplyPadding:
+          const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
     );
   }
 
   List<QuickReply> _quickReplies = [];
 
-  List<ChatMessage> _messages = <ChatMessage>[];
-  List<ChatUser> _typingUsers = <ChatUser>[];
+  final List<ChatMessage> _messages = <ChatMessage>[];
+  final List<ChatUser> _typingUsers = <ChatUser>[];
 
   @override
   void initState() {
@@ -262,7 +263,7 @@ Give them as short direct bulletin points on immediate concerns what the user sh
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollController.animateTo(
         0,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     });
@@ -277,7 +278,7 @@ Give them as short direct bulletin points on immediate concerns what the user sh
         : _getInitialQuickReplies(state);
 
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.symmetric(vertical: 10),
       height: 50,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -287,8 +288,8 @@ Give them as short direct bulletin points on immediate concerns what the user sh
           return GestureDetector(
             onTap: () => _sendQuickReplyMessage(quickReplies[index]),
             child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 5),
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               decoration: BoxDecoration(
                 color: Colors.blueAccent,
                 borderRadius: BorderRadius.circular(20),
@@ -296,13 +297,44 @@ Give them as short direct bulletin points on immediate concerns what the user sh
               child: Center(
                 child: Text(
                   quickReplies[index].title,
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildMessage(ChatMessage message) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(10.0),
+            margin: const EdgeInsets.symmetric(vertical: 5.0),
+            decoration: BoxDecoration(
+              color: message.user.id == _currentUser.id
+                  ? Colors.blue
+                  : Colors.green,
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            child: Text(
+              message.text,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.volume_up, color: Colors.blueAccent),
+          onPressed: () {
+            // Call your function to play the text-to-speech here
+            // Example: _speakMessage(message.text);
+          },
+        ),
+      ],
     );
   }
 
@@ -319,9 +351,9 @@ Give them as short direct bulletin points on immediate concerns what the user sh
             color: Colors.white,
             onSelected: (item) => _onSelected(context, item),
             itemBuilder: (context) => [
-              PopupMenuItem<int>(
+              const PopupMenuItem<int>(
                   value: 0, child: Text('Building Recommendation')),
-              PopupMenuItem<int>(
+              const PopupMenuItem<int>(
                   value: 1, child: Text('Health Recommendation')),
             ],
           ),
@@ -335,11 +367,11 @@ Give them as short direct bulletin points on immediate concerns what the user sh
                   child: SizedBox(
                       height: 60, child: _buildQuickReplies(userState))),
               IconButton(
-                icon: Icon(Icons.camera_alt, color: Colors.blueAccent),
+                icon: const Icon(Icons.camera_alt, color: Colors.blueAccent),
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => CameraPage()),
+                    MaterialPageRoute(builder: (context) => const CameraPage()),
                   );
                 },
               ),
@@ -358,7 +390,7 @@ Give them as short direct bulletin points on immediate concerns what the user sh
               messages: _messages,
               typingUsers: _typingUsers,
               quickReplyOptions: _quickReplyOptions(userState),
-              messageOptions: MessageOptions(
+              messageOptions: const MessageOptions(
                 currentUserContainerColor: Colors.blue,
                 containerColor: Colors.green,
                 textColor: Colors.white,
@@ -372,20 +404,21 @@ Give them as short direct bulletin points on immediate concerns what the user sh
   }
 
   Future<void> getAIResponse(ChatMessage Prompt) async {
-    String question = Prompt.text +
-        '\nGive exact answer in bulletin points, No extra descriptions';
+    String question =
+        '${Prompt.text}\nGive exact answer in bulletin points, No extra descriptions';
     const baseurl = "http://192.168.177.89:3000/api/data";
     try {
       final url = Uri.parse(baseurl);
       final prompt = question;
       final content = [Content.text(prompt)];
-      final String generatedText = 'No Response Generated';
+
       final response = await http.post(url,
           body: jsonEncode({'prompt': prompt}), //User sending to server
           headers: {"Content-Type": "application/json"});
       if (response.statusCode == 200) {
         final data =
             jsonDecode(response.body.toString().replaceAll("**", "").trim());
+        print(data);
         final generatedText = data['message'] ?? 'No Response Generated';
         print(data['message']);
         setState(() {
