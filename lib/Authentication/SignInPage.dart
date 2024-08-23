@@ -10,6 +10,8 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
+  final TextEditingController usernameController =
+      TextEditingController(text: "Deepika");
   final TextEditingController emailController =
       TextEditingController(text: "deepika@gmail.com");
   final TextEditingController passwordController =
@@ -47,6 +49,15 @@ class _SignInPageState extends State<SignInPage> {
               padding: const EdgeInsets.all(13.0),
               child: Column(
                 children: [
+                  TextFormField(
+                    controller: usernameController,
+                    decoration: InputDecoration(
+                        labelText: "Enter UserName: ",
+                        labelStyle: TextStyle(color: Colors.grey, fontSize: 20),
+                        filled: true,
+                        fillColor: Colors.white),
+                  ),
+                  SizedBox(height: 10),
                   TextFormField(
                     controller: emailController,
                     decoration: InputDecoration(
