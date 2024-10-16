@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../Screens/Doctor/docters_home_page.dart';
 import '../Screens/HomePage.dart';
+import '../tools/Uicomponents.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -10,12 +12,19 @@ class SignInPage extends StatefulWidget {
 }
 
 class _SignInPageState extends State<SignInPage> {
+  String email = "";
+  String password = "";
   final TextEditingController usernameController =
       TextEditingController(text: "Deepika");
   final TextEditingController emailController =
       TextEditingController(text: "deepika@gmail.com");
   final TextEditingController passwordController =
       TextEditingController(text: "123456");
+
+  final TextEditingController doctorEmailController =
+      TextEditingController(text: "amruthabj09@gmail.com");
+  final TextEditingController doctorPasswordController =
+      TextEditingController(text: "teddybear2309");
 
   Future<void> _signIn() async {
     try {
@@ -34,6 +43,37 @@ class _SignInPageState extends State<SignInPage> {
     }
   }
 
+  Future<void> _doctorSignIn() async {
+    try {
+      if (doctorEmailController.text == "amruthabj09@gmail.com" &&
+          doctorPasswordController.text == "teddybear2309") {
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: doctorEmailController.text,
+          password: doctorPasswordController.text,
+        );
+
+        // Navigate to the doctor's home screen after successful login
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DoctorHomePage(
+              doctorId: userCredential.user!.uid,
+              doctorName: "Dr. Amrutha",
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Invalid Login')));
+      }
+    } on FirebaseAuthException catch (e) {
+      print('Failed to sign in: $e');
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Invalid Login')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,71 +82,129 @@ class _SignInPageState extends State<SignInPage> {
       ),
       body: SingleChildScrollView(
         child: Center(
-          child: Card(
-            margin: const EdgeInsets.all(10),
-            color: Colors.purple.shade100,
-            child: Padding(
-              padding: const EdgeInsets.all(13.0),
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: usernameController,
-                    decoration: const InputDecoration(
-                        labelText: "Enter UserName: ",
-                        labelStyle: TextStyle(color: Colors.grey, fontSize: 20),
-                        filled: true,
-                        fillColor: Colors.white),
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: emailController,
-                    decoration: const InputDecoration(
-                        labelText: "Enter your Email : ",
-                        labelStyle: TextStyle(color: Colors.grey, fontSize: 20),
-                        filled: true,
-                        fillColor: Colors.white),
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    controller: passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                        labelText: "Enter your Password : ",
-                        labelStyle: TextStyle(color: Colors.grey, fontSize: 20),
-                        filled: true,
-                        fillColor: Colors.white),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
+          child: Column(
+            children: [
+              Card(
+                margin: const EdgeInsets.all(10),
+                color: themeColor,
+                child: Padding(
+                  padding: const EdgeInsets.all(13.0),
+                  child: Column(
                     children: [
-                      ElevatedButton(
-                          onPressed: _signIn,
-                          child: const Text('Login',
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                          onPressed: () {
-                            // Navigator.push(
-                            //     context,
-                            //     MaterialPageRoute(
-                            //         builder: (context) => adminHomePage()));
-                          },
-                          child: const Text('Admin Login',
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                          onPressed: () {
-                            // Navigator.push(
-                            //     context,
-                            //     MaterialPageRoute(
-                            //         builder: (context) => registerScreen()));
-                          },
-                          child: const Text('Register')),
+                      TextFormField(
+                        controller: usernameController,
+                        decoration: const InputDecoration(
+                            labelText: "Enter UserName: ",
+                            labelStyle:
+                                TextStyle(color: Colors.grey, fontSize: 20),
+                            filled: true,
+                            fillColor: Colors.white),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: emailController,
+                        decoration: const InputDecoration(
+                            labelText: "Enter your Email : ",
+                            labelStyle:
+                                TextStyle(color: Colors.grey, fontSize: 20),
+                            filled: true,
+                            fillColor: Colors.white),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: passwordController,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                            labelText: "Enter your Password : ",
+                            labelStyle:
+                                TextStyle(color: Colors.grey, fontSize: 20),
+                            filled: true,
+                            fillColor: Colors.white),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                              onPressed: _signIn,
+                              child: const Text('Login',
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold))),
+                          const SizedBox(width: 10),
+                          const SizedBox(width: 10),
+                          ElevatedButton(
+                              onPressed: () {
+                                // Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //         builder: (context) => registerScreen()));
+                              },
+                              child: const Text('Register')),
+                        ],
+                      ),
                     ],
-                  )
-                ],
+                  ),
+                ),
               ),
-            ),
+              SizedBox(height: 20),
+              Card(
+                margin: EdgeInsets.all(10),
+                color: themeColor,
+                child: Padding(
+                  padding: EdgeInsets.all(13),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Doctor Login',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 15),
+                      TextFormField(
+                        controller: doctorEmailController,
+                        decoration: InputDecoration(
+                          fillColor: Colors.white,
+                          filled: true,
+                          labelText: 'Doctor Email',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.email),
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            email = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                      TextFormField(
+                        controller: doctorPasswordController,
+                        decoration: InputDecoration(
+                          labelText: 'Doctor Password',
+                          fillColor: Colors.white,
+                          filled: true,
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.lock),
+                        ),
+                        obscureText: true,
+                        onChanged: (value) {
+                          setState(() {
+                            password = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _doctorSignIn,
+                        child: const Text('Doctor Login'),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            ],
           ),
         ),
       ),

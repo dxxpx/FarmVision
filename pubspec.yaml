@@ -46,6 +46,11 @@ dependencies:
   dio: ^5.3.3
   animated_text_kit: ^4.2.2
   awesome_dialog: ^3.1.0
+  google_maps_flutter: ^2.9.0
+  geolocator: ^13.0.1
+  flutter_inappwebview: ^6.1.5
+  flutter_tts: ^4.0.2
+  translator: ^1.0.0
 
 
   http: any

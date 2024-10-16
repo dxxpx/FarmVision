@@ -121,74 +121,76 @@ class _NewQueryPageState extends State<NewQueryPage> {
         title: Text('Create New Query'),
         backgroundColor: Colors.teal,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Create a New Query',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.teal,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Create a New Query',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal,
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            TextField(
-              controller: _queryController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                labelText: 'Enter your query',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.all(12),
+              SizedBox(height: 20),
+              TextField(
+                controller: _queryController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  labelText: 'Enter your query',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.all(12),
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            _image != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.file(
-                      _image!,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
+              SizedBox(height: 20),
+              _image != null
+                  ? ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
-                      border: Border.all(color: Colors.grey),
+                      child: Image.file(
+                        _image!,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(color: Colors.grey),
+                      ),
+                      child: Center(
+                        child: Text('No image selected',
+                            style: TextStyle(color: Colors.grey)),
+                      ),
                     ),
-                    child: Center(
-                      child: Text('No image selected',
-                          style: TextStyle(color: Colors.grey)),
-                    ),
-                  ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _pickImage,
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 14),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _pickImage,
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: Text(
+                  'Pick Image',
+                  style: TextStyle(fontSize: 16),
+                ),
               ),
-              child: Text(
-                'Pick Image',
-                style: TextStyle(fontSize: 16),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _submitQuery,
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: Text(
+                  'Submit Query',
+                  style: TextStyle(fontSize: 16),
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _submitQuery,
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 14),
-              ),
-              child: Text(
-                'Submit Query',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

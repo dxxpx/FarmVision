@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:farmvision/Screens/query_pages/query_detail_page.dart';
@@ -13,10 +14,12 @@ class QueryListPage extends StatefulWidget {
 class _QueryListPageState extends State<QueryListPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchText = '';
+  final user = FirebaseAuth.instance.currentUser?.uid;
 
   @override
   void initState() {
     super.initState();
+    print('User ID : $user');
     _searchController.addListener(() {
       setState(() {
         _searchText = _searchController.text.toLowerCase();
@@ -35,10 +38,10 @@ class _QueryListPageState extends State<QueryListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Community Queries'),
-        backgroundColor: Colors.teal,
-      ),
+      // appBar: AppBar(
+      //   title: Text('Community Queries'),
+      //   backgroundColor: Colors.teal,
+      // ),
       body: Column(
         children: [
           Padding(
@@ -81,7 +84,7 @@ class _QueryListPageState extends State<QueryListPage> {
                         leading: CircleAvatar(
                           backgroundColor: Colors.teal,
                           child: Text(
-                            query['author']?[0] ??
+                            query['author']?[0].toString().toUpperCase() ??
                                 'U', // Display first letter of username
                             style: TextStyle(color: Colors.white),
                           ),
@@ -141,7 +144,10 @@ class _QueryListPageState extends State<QueryListPage> {
               );
             },
             backgroundColor: Colors.teal,
-            child: Icon(Icons.history),
+            child: Icon(
+              Icons.history,
+              color: Colors.white,
+            ),
           ),
           SizedBox(width: 16),
           FloatingActionButton(
@@ -152,7 +158,10 @@ class _QueryListPageState extends State<QueryListPage> {
               );
             },
             backgroundColor: Colors.teal,
-            child: Icon(Icons.add),
+            child: Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
           ),
         ],
       ),

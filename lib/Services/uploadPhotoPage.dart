@@ -6,10 +6,12 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
+import '../Screens/Farmer/DiseaseDetailPage.dart';
 import '../tools/Uicomponents.dart';
 
 class CameraPage extends StatefulWidget {
-  const CameraPage({super.key});
+  bool iscattle;
+  CameraPage({super.key, required this.iscattle});
 
   @override
   State<CameraPage> createState() => _MyHomePageState();
@@ -21,6 +23,26 @@ class _MyHomePageState extends State<CameraPage> {
   String diseasePrecautions = '';
   bool detecting = false;
   bool precautionLoading = false;
+  late bool isitcattle;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    initializeIsCattle();
+  }
+
+  List<dynamic> symptoms = [];
+  List<dynamic> precautions = [];
+  List<dynamic> treatments = [];
+  List<dynamic> causes = [];
+  List<dynamic> medicines = [];
+  List<dynamic> pesticides = [];
+  List<dynamic> vaccinations = [];
+
+  void initializeIsCattle() {
+    isitcattle = widget.iscattle;
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile =
@@ -31,44 +53,37 @@ class _MyHomePageState extends State<CameraPage> {
       });
       File image = File(pickedFile.path);
       print('Image file : $image \n');
-      // String prompt =
-      //     "Exactly give what the disease in the given image is, No extra words, only the disease name alone!!";
-      // await sendImageWithPromptToGeminiAI(image, prompt);
     }
   }
 
   Future<void> sendImageWithPromptToGeminiAI(
       File? image, String userprompt) async {
-    const baseurl = "http://192.168.177.89:3000/api/data";
+    const baseurl = "${baseUrl}api/data";
     if (image == null) return;
     try {
       final url = Uri.parse(baseurl);
-      final bytes = image.readAsBytesSync();
-      final base64Image = base64Encode(bytes);
-      final prompt =
-          "Accurately Identify the plant disease(its tomato) in this photo? Give only the disease name, NO extra words, No descriptions.\n Its descriptions given by user is $userprompt";
-
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "image": {
-            "inlineData": {
-              "data": base64Image,
-              "mimeType": "image/jpeg",
-            }
-          },
-          "prompt": prompt,
-        }),
-      );
+      var request = http.MultipartRequest('POST', url);
+      request.files.add(await http.MultipartFile.fromPath('image', image.path));
+      request.fields['prompt'] = userprompt;
+      print("Request Field is : ${request.fields}");
+      print("Request File is : ${request.files}");
+      var response = await request.send();
+      var responseData = await http.Response.fromStream(response);
+      final data = jsonDecode(responseData.body);
+      print(data);
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final generatedText = data['message'] ?? 'No Response Generated';
-
         setState(() {
-          diseaseName = generatedText;
+          diseaseName = data['name'];
+          symptoms = [data['symptoms']];
+          precautions = [data['precautions']];
+          treatments = [data['treatments']];
+          causes = [data['causes']];
+          medicines = [data['medicines']];
+          pesticides:
+          isitcattle ? [] : [data['pesticides']];
         });
+        print(responseData.body);
       } else {
         setState(() {
           diseaseName = 'Unable to Generate Response';
@@ -82,21 +97,21 @@ class _MyHomePageState extends State<CameraPage> {
 
   detectDisease() async {
     if (_selectedImage == null) {
-      // Show an error if no image is selected
       _showErrorSnackBar("Please select an image first.");
       return;
     }
     setState(() {
-      detecting = true; // Start the detection process
+      detecting = true;
     });
 
     try {
-      String prompt =
-          "Exactly give what the disease in the given image is, No extra words, only the disease name alone!!";
+      String prompt = isitcattle
+          ? "GIVE THE NAME, 5 SYMPTOMS, 5 PRECAUTIONS, BEST TREATMENTS, 5 REASONS OF CAUSE, MEDICINE OF THE ANIMAL DISEASE, AVAILABLE VACCINES FOR THIS ANIMAL DISEASE IN THIS IMAGE IN JSON FORMAT. NO EXTRA WORDS. ONLY THE JSON ALONE, NO HEADINGS, NO EXPLANATIONS NEEDED. Let field names be - name, symptoms, precautions, treatments, causes, medicines."
+          : "GIVE THE NAME, 5 SYMPTOMS, 5 PRECAUTIONS, BEST TREATMENTS, 5 REASONS OF CAUSE, MEDICINE/PESTICIDE OF THE PLANT/CROP DISEASE IN THIS IMAGE IN JSON FORMAT. NO EXTRA WORDS. ONLY THE JSON ALONE, NO HEADINGS , NO EXPLANATIONS NEEDED\nLet Field names be - name, symptoms, precautions, treatments, causes, medicines, pesticides.";
       await sendImageWithPromptToGeminiAI(_selectedImage!, prompt);
 
       setState(() {
-        detecting = false; // Stop the detection process
+        detecting = false;
       });
 
       if (diseaseName.isNotEmpty) {
@@ -106,13 +121,11 @@ class _MyHomePageState extends State<CameraPage> {
       }
     } catch (e) {
       setState(() {
-        detecting = false; // Stop the detection process in case of error
+        detecting = false;
       });
       _showErrorSnackBar("Error detecting disease: $e");
     }
   }
-
-  showPrecautions() {}
 
   void _showErrorSnackBar(Object error) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -129,7 +142,7 @@ class _MyHomePageState extends State<CameraPage> {
       title: title,
       desc: content,
       btnOkText: 'Got it',
-      btnOkColor: themeColor,
+      btnOkColor: isitcattle ? cattleColor : themeColor,
       btnOkOnPress: () {},
     ).show();
   }
@@ -137,9 +150,15 @@ class _MyHomePageState extends State<CameraPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          isitcattle ? "Capture Your Cattle" : "Capture Your Crop",
+          style: appTstyle,
+        ),
+        backgroundColor: isitcattle ? cattleColor : themeColor,
+      ),
       body: Column(
         children: <Widget>[
-          const SizedBox(height: 20),
           Stack(
             children: [
               Container(
@@ -150,7 +169,7 @@ class _MyHomePageState extends State<CameraPage> {
                     // Top right corner
                     bottomLeft: Radius.circular(50.0), // Bottom right corner
                   ),
-                  color: themeColor,
+                  color: isitcattle ? cattleColor : themeColor,
                 ),
               ),
               Container(
@@ -183,7 +202,7 @@ class _MyHomePageState extends State<CameraPage> {
                         _pickImage(ImageSource.gallery);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: themeColor,
+                        backgroundColor: isitcattle ? cattleColor : themeColor,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -205,7 +224,7 @@ class _MyHomePageState extends State<CameraPage> {
                         _pickImage(ImageSource.camera);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: themeColor,
+                        backgroundColor: isitcattle ? cattleColor : themeColor,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -225,7 +244,9 @@ class _MyHomePageState extends State<CameraPage> {
           _selectedImage == null
               ? SizedBox(
                   height: MediaQuery.of(context).size.height * 0.5,
-                  child: Image.asset('assets/images/uploadpic.png'),
+                  child: isitcattle
+                      ? Image.asset('assets/images/capturecattle.png')
+                      : Image.asset('assets/images/uploadpic.png'),
                 )
               : Expanded(
                   child: Container(
@@ -245,7 +266,7 @@ class _MyHomePageState extends State<CameraPage> {
           if (_selectedImage != null)
             detecting
                 ? SpinKitWave(
-                    color: themeColor,
+                    color: isitcattle ? cattleColor : themeColor,
                     size: 30,
                   )
                 : Container(
@@ -254,7 +275,7 @@ class _MyHomePageState extends State<CameraPage> {
                         const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: themeColor,
+                        backgroundColor: isitcattle ? cattleColor : themeColor,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 30, vertical: 15),
                         // Set some horizontal and vertical padding
@@ -277,7 +298,7 @@ class _MyHomePageState extends State<CameraPage> {
                       ),
                     ),
                   ),
-          if (diseaseName != '')
+          if (diseaseName.isNotEmpty)
             Column(
               children: [
                 Container(
@@ -292,16 +313,11 @@ class _MyHomePageState extends State<CameraPage> {
                             color: Colors.black,
                             fontWeight: FontWeight.w700,
                             fontSize: 16),
-                        child: AnimatedTextKit(
-                            isRepeatingAnimation: false,
-                            repeatForever: false,
-                            displayFullTextOnTap: true,
-                            totalRepeatCount: 1,
-                            animatedTexts: [
-                              TyperAnimatedText(
-                                diseaseName.trim(),
-                              ),
-                            ]),
+                        child: Text(
+                          'Detected disease is ${diseaseName.trim()}',
+                          softWrap: true,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       )
                     ],
                   ),
@@ -313,15 +329,28 @@ class _MyHomePageState extends State<CameraPage> {
                       )
                     : ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor:
+                              isitcattle ? cattleColor : themeColor,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 30, vertical: 15),
                         ),
                         onPressed: () {
-                          showPrecautions();
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Diseasedetailpage(
+                                        diseaseName: diseaseName,
+                                        symptoms: symptoms,
+                                        precautions: precautions,
+                                        treatments: treatments,
+                                        causes: causes,
+                                        medicines: medicines,
+                                        pesticides:
+                                            isitcattle ? [] : pesticides,
+                                      )));
                         },
                         child: Text(
-                          'PRECAUTION',
+                          'DETAILS',
                           style: TextStyle(
                             color: textColor,
                           ),

@@ -223,15 +223,15 @@ class _QueryDetailPageState extends State<QueryDetailPage> {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'Timestamp: ${_formatTimestamp(comment['timestamp'] as Timestamp?)}',
+                  'Posted: ${_formatTimestamp(comment['timestamp'] as Timestamp?)}',
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 SizedBox(height: 10),
                 Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: StreamBuilder<QuerySnapshot>(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        StreamBuilder<QuerySnapshot>(
                           stream: FirebaseFirestore.instance
                               .collection('comments')
                               .doc(widget.commentId)
@@ -242,6 +242,8 @@ class _QueryDetailPageState extends State<QueryDetailPage> {
                             if (!responseSnapshot.hasData)
                               return Center(child: CircularProgressIndicator());
                             return ListView.builder(
+                              physics: NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
                               itemCount: responseSnapshot.data!.docs.length,
                               itemBuilder: (context, index) {
                                 var response =
@@ -268,7 +270,6 @@ class _QueryDetailPageState extends State<QueryDetailPage> {
                                                 backgroundColor: Colors.teal,
                                                 foregroundColor: Colors.white,
                                               ),
-                                              SizedBox(width: 8),
                                               Expanded(
                                                 child: Column(
                                                   crossAxisAlignment:
@@ -285,12 +286,11 @@ class _QueryDetailPageState extends State<QueryDetailPage> {
                                                         response['text'] ?? ''),
                                                     SizedBox(height: 2),
                                                     Text(
-                                                      'Timestamp: ${_formatTimestamp(response['timestamp'] as Timestamp?)}',
+                                                      'Posted ${_formatTimestamp(response['timestamp'] as Timestamp?)}',
                                                       style: TextStyle(
                                                           fontSize: 12,
                                                           color: Colors.grey),
                                                     ),
-                                                    SizedBox(height: 2),
                                                     Row(
                                                       children: [
                                                         IconButton(
@@ -301,7 +301,7 @@ class _QueryDetailPageState extends State<QueryDetailPage> {
                                                                   response.id),
                                                         ),
                                                         Text(
-                                                            '${response['likes'] ?? 0}'),
+                                                            '${response['likes']}'),
                                                         IconButton(
                                                           icon: Icon(
                                                               Icons.thumb_down),
@@ -310,7 +310,7 @@ class _QueryDetailPageState extends State<QueryDetailPage> {
                                                                   response.id),
                                                         ),
                                                         Text(
-                                                            '${response['dislikes'] ?? 0}'),
+                                                            '${response['dislikes']}'),
                                                       ],
                                                     ),
                                                   ],
@@ -318,7 +318,6 @@ class _QueryDetailPageState extends State<QueryDetailPage> {
                                               ),
                                             ],
                                           ),
-                                          SizedBox(height: 10),
                                           StreamBuilder<QuerySnapshot>(
                                             stream: FirebaseFirestore.instance
                                                 .collection('comments')
@@ -333,25 +332,20 @@ class _QueryDetailPageState extends State<QueryDetailPage> {
                                               if (!replySnapshot.hasData)
                                                 return Container();
                                               return ListView.builder(
+                                                physics:
+                                                    NeverScrollableScrollPhysics(),
                                                 shrinkWrap: true,
                                                 itemCount: replySnapshot
                                                     .data!.docs.length,
-                                                itemBuilder:
-                                                    (context, replyIndex) {
+                                                itemBuilder: (context, index) {
                                                   var reply = replySnapshot
-                                                      .data!.docs[replyIndex];
+                                                      .data!.docs[index];
                                                   return Padding(
                                                     padding:
                                                         const EdgeInsets.only(
-                                                            left: 16.0),
+                                                            left: 32.0),
                                                     child: Card(
-                                                      elevation: 1,
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(8.0),
-                                                      ),
+                                                      elevation: 2,
                                                       child: Padding(
                                                         padding:
                                                             const EdgeInsets
@@ -378,39 +372,26 @@ class _QueryDetailPageState extends State<QueryDetailPage> {
                                                                 SizedBox(
                                                                     width: 8),
                                                                 Expanded(
-                                                                  child: Column(
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      Text(
-                                                                        reply['author'] ??
-                                                                            '',
-                                                                        style: TextStyle(
-                                                                            fontWeight:
-                                                                                FontWeight.bold),
-                                                                      ),
-                                                                      SizedBox(
-                                                                          height:
-                                                                              4),
-                                                                      Text(reply[
-                                                                              'text'] ??
+                                                                  child: Text(
+                                                                      reply['author'] ??
                                                                           ''),
-                                                                      SizedBox(
-                                                                          height:
-                                                                              4),
-                                                                      Text(
-                                                                        'Timestamp: ${_formatTimestamp(reply['timestamp'] as Timestamp?)}',
-                                                                        style: TextStyle(
-                                                                            fontSize:
-                                                                                12,
-                                                                            color:
-                                                                                Colors.grey),
-                                                                      ),
-                                                                    ],
-                                                                  ),
                                                                 ),
                                                               ],
+                                                            ),
+                                                            SizedBox(height: 4),
+                                                            Text(
+                                                              reply['text'] ??
+                                                                  '',
+                                                              style: TextStyle(
+                                                                  fontSize: 14),
+                                                            ),
+                                                            SizedBox(height: 4),
+                                                            Text(
+                                                              'Posted: ${_formatTimestamp(reply['timestamp'] as Timestamp?)}',
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .grey),
                                                             ),
                                                           ],
                                                         ),
@@ -421,23 +402,21 @@ class _QueryDetailPageState extends State<QueryDetailPage> {
                                               );
                                             },
                                           ),
-                                          if (comment['status'] == 'open') ...[
-                                            SizedBox(height: 10),
-                                            TextField(
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 5.0),
+                                            child: TextField(
                                               controller: _replyController,
                                               decoration: InputDecoration(
-                                                hintText: 'Add a reply...',
-                                                border: OutlineInputBorder(),
+                                                labelText: 'Add a reply',
+                                                suffixIcon: IconButton(
+                                                  icon: Icon(Icons.send),
+                                                  onPressed: () =>
+                                                      _addReply(response.id),
+                                                ),
                                               ),
-                                              maxLines: 2,
                                             ),
-                                            SizedBox(height: 10),
-                                            ElevatedButton(
-                                              onPressed: () =>
-                                                  _addReply(response.id),
-                                              child: Text('Reply'),
-                                            ),
-                                          ],
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -447,38 +426,32 @@ class _QueryDetailPageState extends State<QueryDetailPage> {
                             );
                           },
                         ),
-                      ),
-                      if (comment['status'] == 'open') ...[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: TextField(
-                            controller: _responseController,
-                            decoration: InputDecoration(
-                              labelText: 'Add a Response',
-                              border: OutlineInputBorder(),
-                            ),
-                            maxLines: 2,
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: _addResponse,
-                          child: Text('Submit Response'),
-                        ),
-                        SizedBox(height: 20),
-                        if (currentUser != null) ...[
-                          ElevatedButton(
-                            onPressed: _closeQuery,
-                            child: Text('Close Query'),
-                            style: ElevatedButton.styleFrom(
-                                // Change button color if needed
-                                ),
-                          ),
-                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
+                if (comment['status'] == 'open')
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _responseController,
+                          decoration: InputDecoration(
+                            labelText: 'Add a response',
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.send),
+                              onPressed: _addResponse,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: _closeQuery,
+                          child: Text('Close Query'),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           );

@@ -1,7 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'Authentication/SignInPage.dart';
+import 'Screens/Doctor/RegisterPlace.dart';
+import 'Screens/Farmer/GetMapLocation.dart';
 import 'Screens/HomePage.dart';
 import 'Services/LLM.dart';
+import 'Dummy.dart';
+import 'Services/uploadPhotoPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +26,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(title: 'Material App', home: homePage());
+    return MaterialApp(title: 'Material App', home: SignInPage());
   }
 }

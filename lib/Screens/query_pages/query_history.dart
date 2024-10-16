@@ -77,6 +77,7 @@ class QueryHistoryPage extends StatelessWidget {
                   // Close option only appears if the query is still open
                   trailing: query['status'] == 'open'
                       ? IconButton(
+                          tooltip: "Close",
                           icon: Icon(Icons.close),
                           onPressed: () async {
                             await _closeQuery(query.id);

@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:farmvision/Services/uploadPhotoPage.dart';
+import 'package:farmvision/tools/Uicomponents.dart';
 import 'package:flutter/material.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:http/http.dart' as http;
 
 class ChatPage extends StatefulWidget {
@@ -222,7 +223,7 @@ Give them as short direct bulletin points on immediate concerns what the user sh
   }
 
   void sendPromptToNode(String Prompt) async {
-    const baseurl = "http://192.168.177.89:3000/api/data";
+    const baseurl = "${baseUrl}/chatbot";
     try {
       final url = Uri.parse(baseurl);
       final response = await http.post(url,
@@ -342,21 +343,22 @@ Give them as short direct bulletin points on immediate concerns what the user sh
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Generative AI Chat'),
+        title: Text('Generative AI Chat', style: appTstyle),
+        backgroundColor: themeColor,
         actions: [
           // ElevatedButton(
           //     onPressed: _sendRecommendationRequest,
           //     child: Text('Recommendations')),
-          PopupMenuButton<int>(
-            color: Colors.white,
-            onSelected: (item) => _onSelected(context, item),
-            itemBuilder: (context) => [
-              const PopupMenuItem<int>(
-                  value: 0, child: Text('Building Recommendation')),
-              const PopupMenuItem<int>(
-                  value: 1, child: Text('Health Recommendation')),
-            ],
-          ),
+          // PopupMenuButton<int>(
+          //   color: Colors.white,
+          //   onSelected: (item) => _onSelected(context, item),
+          //   itemBuilder: (context) => [
+          //     const PopupMenuItem<int>(
+          //         value: 0, child: Text('Building Recommendation')),
+          //     const PopupMenuItem<int>(
+          //         value: 1, child: Text('Health Recommendation')),
+          //   ],
+          // ),
         ],
       ),
       body: Column(
@@ -367,11 +369,14 @@ Give them as short direct bulletin points on immediate concerns what the user sh
                   child: SizedBox(
                       height: 60, child: _buildQuickReplies(userState))),
               IconButton(
-                icon: const Icon(Icons.camera_alt, color: Colors.blueAccent),
+                icon: const Icon(Icons.camera_alt, color: Colors.white),
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const CameraPage()),
+                    MaterialPageRoute(
+                        builder: (context) => CameraPage(
+                              iscattle: true,
+                            )),
                   );
                 },
               ),
@@ -399,14 +404,14 @@ Give them as short direct bulletin points on immediate concerns what the user sh
           ),
         ],
       ),
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.grey.shade600,
     );
   }
 
   Future<void> getAIResponse(ChatMessage Prompt) async {
     String question =
         '${Prompt.text}\nGive exact answer in bulletin points, No extra descriptions';
-    const baseurl = "http://192.168.177.89:3000/api/data";
+    const baseurl = "${baseUrl}/chatbot";
     try {
       final url = Uri.parse(baseurl);
       final prompt = question;
